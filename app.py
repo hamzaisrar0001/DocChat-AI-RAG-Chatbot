@@ -11,7 +11,7 @@ import time
 import os
 
 load_dotenv()
-HF_TOKEN = os.getenv("CHROMA_HUGGINGFACE_API_KEY")
+HF_TOKEN = os.getenv("CHROMA_HUGGINGFACE_API_KEY") or st.secrets.get("CHROMA_HUGGINGFACE_API_KEY", None)
 
 st.set_page_config(
     page_title="DocChat AI",

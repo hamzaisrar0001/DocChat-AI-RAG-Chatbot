@@ -4,6 +4,8 @@
 
 ---
 
+![DocChat AI Interface](screenshots/image.png)
+
 ##  Features
 
 - 📄 **PDF Upload** — Upload any PDF directly from the UI
@@ -89,8 +91,6 @@ Get your free token from [huggingface.co/settings/tokens](https://huggingface.co
 ```bash
 streamlit run app.py
 ```
-
-![DocChat AI Interface](screenshots/image.png)
 
 Open [http://localhost:8501](http://localhost:8501) in your browser.
 

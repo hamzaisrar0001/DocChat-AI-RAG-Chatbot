@@ -90,6 +90,8 @@ Get your free token from [huggingface.co/settings/tokens](https://huggingface.co
 streamlit run app.py
 ```
 
+![DocChat AI Interface](screenshots/image.png)
+
 Open [http://localhost:8501](http://localhost:8501) in your browser.
 
 ---

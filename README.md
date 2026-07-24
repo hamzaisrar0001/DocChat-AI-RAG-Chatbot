@@ -2,15 +2,9 @@
 
 > An intelligent RAG-powered chatbot that lets you have a conversation with any PDF document. Upload your document, ask questions in natural language, and get accurate answers grounded in the content.
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://hamzaisrar0001-docchat-ai-rag-chatbot-app.streamlit.app)
-![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python)
-![LangChain](https://img.shields.io/badge/LangChain-0.3-green?logo=chainlink)
-![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector_Store-orange)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
-
 ---
 
-## ✨ Features
+##  Features
 
 - 📄 **PDF Upload** — Upload any PDF directly from the UI
 - 💬 **WhatsApp-style Chat** — Clean, intuitive chat interface
@@ -22,7 +16,7 @@
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 User Question
@@ -50,7 +44,7 @@ User Question
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Component | Technology |
 |---|---|
@@ -64,7 +58,7 @@ User Question
 
 ---
 
-## 🚀 Run Locally
+##  Run Locally
 
 ### 1. Clone the repository
 ```bash
@@ -114,7 +108,7 @@ CHROMA_HUGGINGFACE_API_KEY = "hf_your_token_here"
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 DocChat-AI-RAG-Chatbot/
@@ -128,7 +122,7 @@ DocChat-AI-RAG-Chatbot/
 
 ---
 
-## ⚙️ RAG Pipeline Parameters
+##  RAG Pipeline Parameters
 
 | Parameter | Value |
 |---|---|
@@ -140,7 +134,7 @@ DocChat-AI-RAG-Chatbot/
 
 ---
 
-## 📦 Requirements
+##  Requirements
 
 ```
 streamlit
@@ -156,9 +150,30 @@ huggingface_hub
 
 ---
 
-## 🔒 Security Note
+##  Security Note
 
 Never commit your `.env` file or expose your HuggingFace API token publicly. Always use environment variables or Streamlit Secrets for sensitive credentials.
+
+---
+
+## What I Would Improve
+- Add conversation memory so users can ask follow-up questions
+- Support multiple PDFs simultaneously
+- Add source citation with page numbers from the document
+- Deploy on cloud for public access (HuggingFace Spaces or AWS)
+- Add user authentication for private documents
+
+---
+
+## Tradeoffs
+- ChromaDB is fast for local use but doesn't scale well for very large documents
+- LLaMA runs locally which ensures privacy but requires good hardware
+- Chose RAG over fine-tuning because it allows dynamic knowledge updates without retraining the model
+
+---
+
+## Time Taken
+Approximately 2.5 hours for this assessment submission
 
 ---
 

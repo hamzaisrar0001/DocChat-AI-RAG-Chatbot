@@ -215,10 +215,24 @@ html, body, [data-testid="stAppViewContainer"] {
 .time-user { text-align: right; }
 .time-bot  { text-align: left; }
 
-.empty-state { text-align: center; padding: 4rem 2rem; }
+.empty-state { text-align: center; padding: 2.5rem 2rem 1rem; }
 .empty-icon  { font-size: 2.5rem; opacity: 0.18; margin-bottom: 1rem; }
 .empty-state h3 { font-size: 0.95rem; font-weight: 600; color: #bbb; margin-bottom: 0.4rem; }
 .empty-state p  { font-size: 0.77rem; color: #ddd; }
+
+.upload-prompt {
+    max-width: 520px;
+    margin: 1.5rem auto 0;
+    padding: 0 1rem;
+}
+
+.upload-prompt-label {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #ff6b00;
+    font-weight: 600;
+    margin-bottom: 0.7rem;
+}
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 1.4rem; }
 
@@ -291,7 +305,35 @@ button[kind="secondary"]:hover { background: #fff0e0 !important; }
 
 div[data-testid="stMarkdownContainer"] p { color: #1a1a2e; }
 
-footer, #MainMenu, [data-testid="stToolbar"] { display: none !important; }  header[data-testid="stHeader"] { background: transparent !important; }
+/* Streamlit branding chhupao, magar header ko zinda rakho */
+footer, #MainMenu, [data-testid="stToolbar"] { display: none !important; }
+
+header[data-testid="stHeader"] {
+    background: transparent !important;
+    height: 0 !important;
+}
+
+/* Sidebar band hone par expand button — ye hamesha nazar aana chahiye */
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="collapsedControl"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 999999 !important;
+    top: 12px !important;
+    left: 12px !important;
+    background: #ffffff !important;
+    border: 1.5px solid #ffd4a8 !important;
+    border-radius: 10px !important;
+    padding: 4px !important;
+    box-shadow: 0 2px 10px rgba(255,107,0,0.15) !important;
+}
+
+[data-testid="stSidebarCollapsedControl"] svg,
+[data-testid="collapsedControl"] svg {
+    color: #ff6b00 !important;
+    fill: #ff6b00 !important;
+}
 
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -387,6 +429,24 @@ def process_pdf(uploaded_file) -> tuple:
     return chunks, len(pages)
 
 
+def handle_upload(uploaded_file):
+    """Sidebar aur main page — dono uploaders yahi function call karte hain."""
+    if not uploaded_file:
+        return
+    if st.session_state.pdf_name == uploaded_file.name:
+        return
+
+    with st.spinner("Indexing document..."):
+        chunks, num_pages = process_pdf(uploaded_file)
+        st.session_state.collection    = build_collection(chunks, uploaded_file.name)
+        st.session_state.pdf_name      = uploaded_file.name
+        st.session_state.pdf_chunks    = len(chunks)
+        st.session_state.pdf_pages     = num_pages
+        st.session_state.messages      = []
+        st.session_state.input_counter += 1
+    st.rerun()
+
+
 if "messages"      not in st.session_state: st.session_state.messages      = []
 if "collection"    not in st.session_state: st.session_state.collection    = None
 if "pdf_name"      not in st.session_state: st.session_state.pdf_name      = None
@@ -408,26 +468,18 @@ with st.sidebar:
 
     st.markdown('<div class="section-label">Document</div>', unsafe_allow_html=True)
 
-    uploaded_file = st.file_uploader(
+    sidebar_file = st.file_uploader(
         "PDF Upload",
         type=["pdf"],
-        label_visibility="collapsed"
+        label_visibility="collapsed",
+        key="sidebar_uploader"
     )
+    handle_upload(sidebar_file)
 
-    if uploaded_file:
-        if st.session_state.pdf_name != uploaded_file.name:
-            with st.spinner("Indexing document..."):
-                chunks, num_pages              = process_pdf(uploaded_file)
-                st.session_state.collection    = build_collection(chunks, uploaded_file.name)
-                st.session_state.pdf_name      = uploaded_file.name
-                st.session_state.pdf_chunks    = len(chunks)
-                st.session_state.pdf_pages     = num_pages
-                st.session_state.messages      = []
-                st.session_state.input_counter += 1
-
+    if st.session_state.pdf_name:
         st.markdown(f"""
         <div class="doc-card">
-            <div class="doc-card-name">📄 {uploaded_file.name}</div>
+            <div class="doc-card-name">📄 {st.session_state.pdf_name}</div>
             <div class="doc-pills">
                 <span class="pill">{st.session_state.pdf_pages} pages</span>
                 <span class="pill">{st.session_state.pdf_chunks} chunks</span>
@@ -435,7 +487,6 @@ with st.sidebar:
         </div>
         <div class="badge-ready">● Ready to chat</div>
         """, unsafe_allow_html=True)
-
     else:
         st.markdown('<div class="badge-waiting">○ No document loaded</div>', unsafe_allow_html=True)
 
@@ -464,64 +515,91 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="chat-wrap">', unsafe_allow_html=True)
 
-if not st.session_state.messages:
+# Koi document load nahi hua -> main page par hi uploader dikhao.
+# Isse sidebar band ho to bhi app kaam karti rehti hai.
+if not st.session_state.collection:
     st.markdown("""
     <div class="empty-state">
         <div class="empty-icon">💬</div>
         <h3>No conversation yet</h3>
-        <p>Upload a PDF from the sidebar, then ask your first question</p>
-        <div class="chips">
-            <span class="chip">What is this document about?</span>
-            <span class="chip">Summarize the key points</span>
-            <span class="chip">What are the main topics?</span>
-        </div>
+        <p>Upload a PDF below, then ask your first question</p>
     </div>
     """, unsafe_allow_html=True)
+
+    left, mid, right = st.columns([1, 2, 1])
+    with mid:
+        main_file = st.file_uploader(
+            "Upload a PDF to begin",
+            type=["pdf"],
+            key="main_uploader"
+        )
+        handle_upload(main_file)
+
+    st.markdown("""
+    <div class="chips">
+        <span class="chip">What is this document about?</span>
+        <span class="chip">Summarize the key points</span>
+        <span class="chip">What are the main topics?</span>
+    </div>
+    """, unsafe_allow_html=True)
+
 else:
-    for msg in st.session_state.messages:
-        t    = msg.get("time", "")
-        text = msg["content"]
+    st.markdown('<div class="chat-wrap">', unsafe_allow_html=True)
 
-        if msg["role"] == "user":
-            st.markdown(f"""
-            <div class="msg-row msg-row-user">
-                <div>
-                    <div class="bubble bubble-user">{text}</div>
-                    <div class="msg-time time-user">{t}</div>
-                </div>
-                <div class="avatar av-user">👤</div>
+    if not st.session_state.messages:
+        st.markdown("""
+        <div class="empty-state">
+            <div class="empty-icon">💬</div>
+            <h3>Document ready</h3>
+            <p>Ask your first question below</p>
+            <div class="chips">
+                <span class="chip">What is this document about?</span>
+                <span class="chip">Summarize the key points</span>
+                <span class="chip">What are the main topics?</span>
             </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"""
-            <div class="msg-row msg-row-bot">
-                <div class="avatar av-bot">🧠</div>
-                <div>
-                    <div class="bubble bubble-bot">{text}</div>
-                    <div class="msg-time time-bot">{t}</div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-col1, col2 = st.columns([11, 1])
-with col1:
-    user_input = st.text_input(
-        "chat_input",
-        placeholder="Ask a question about your document...",
-        label_visibility="collapsed",
-        key=f"input_{st.session_state.input_counter}"
-    )
-with col2:
-    send = st.button("➤", type="primary", use_container_width=True)
-
-if send and user_input.strip():
-    if not st.session_state.collection:
-        st.warning("Please upload a PDF first.")
+        </div>
+        """, unsafe_allow_html=True)
     else:
+        for msg in st.session_state.messages:
+            t    = msg.get("time", "")
+            text = msg["content"]
+
+            if msg["role"] == "user":
+                st.markdown(f"""
+                <div class="msg-row msg-row-user">
+                    <div>
+                        <div class="bubble bubble-user">{text}</div>
+                        <div class="msg-time time-user">{t}</div>
+                    </div>
+                    <div class="avatar av-user">👤</div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class="msg-row msg-row-bot">
+                    <div class="avatar av-bot">🧠</div>
+                    <div>
+                        <div class="bubble bubble-bot">{text}</div>
+                        <div class="msg-time time-bot">{t}</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    col1, col2 = st.columns([11, 1])
+    with col1:
+        user_input = st.text_input(
+            "chat_input",
+            placeholder="Ask a question about your document...",
+            label_visibility="collapsed",
+            key=f"input_{st.session_state.input_counter}"
+        )
+    with col2:
+        send = st.button("➤", type="primary", use_container_width=True)
+
+    if send and user_input.strip():
         question = user_input.strip()
         now      = datetime.now().strftime("%H:%M")
 

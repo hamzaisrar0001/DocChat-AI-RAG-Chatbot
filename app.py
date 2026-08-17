@@ -291,7 +291,7 @@ button[kind="secondary"]:hover { background: #fff0e0 !important; }
 
 div[data-testid="stMarkdownContainer"] p { color: #1a1a2e; }
 
-footer, #MainMenu, header[data-testid="stHeader"] { display: none !important; }
+footer, #MainMenu, [data-testid="stToolbar"] { display: none !important; }  header[data-testid="stHeader"] { background: transparent !important; }
 
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }

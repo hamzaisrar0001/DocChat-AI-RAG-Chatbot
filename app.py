@@ -465,15 +465,16 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="section-label">Document</div>', unsafe_allow_html=True)
+ st.markdown('<div class="section-label">Document</div>', unsafe_allow_html=True)
 
-    sidebar_file = st.file_uploader(
-        "PDF Upload",
-        type=["pdf"],
-        label_visibility="collapsed",
-        key="sidebar_uploader"
-    )
-    handle_upload(sidebar_file)
+    if st.session_state.collection:
+        sidebar_file = st.file_uploader(
+            "PDF Upload",
+            type=["pdf"],
+            label_visibility="collapsed",
+            key="sidebar_uploader"
+        )
+        handle_upload(sidebar_file)
 
     if st.session_state.pdf_name:
         st.markdown(f"""

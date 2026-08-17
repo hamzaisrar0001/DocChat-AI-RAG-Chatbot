@@ -310,7 +310,6 @@ footer, #MainMenu, [data-testid="stToolbar"] { display: none !important; }
 
 header[data-testid="stHeader"] {
     background: transparent !important;
-    height: 0 !important;
 }
 
 /* Sidebar band hone par expand button — ye hamesha nazar aana chahiye */
